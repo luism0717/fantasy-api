@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI(
     title = "Fantasy Sports API",
@@ -6,15 +7,34 @@ app = FastAPI(
     version = "0.1.0"
 )
 
+players_db = {
+    1: {"name": "Patrick Mahomes", "position": "QB", "nfl_team": "Kansas City Chiefs"},
+    2: {"name": "Justin Jefferson", "position": "WR", "nfl_team": "Minnesota Vikings"},
+    3: {"name": "Christian McCaffrey", "position": "RB", "nfl_team": "San Francisco 49ers"}
+}
+
 #That request → route → function → response
 @app.get("/")
 def root():
     return {"message": "Fantasy API is alive!"}
 
 @app.get("/players")
-def playerInfo():
-    return [
-        {"name": "Patrick Mahomes", "position": "QB", "nfl_team": "Kansas City Chiefs"},
-        {"name": "Justin Jefferson", "position": "WR", "nfl_team": "Minnesota Vikings"},
-        {"name": "Christian McCaffrey", "position": "RB", "nfl_team": "San Francisco 49ers"}
-    ]
+def playersInfo():
+    return players_db
+
+@app.get("/players/{player_id}")
+def getPlayer(player_id: int):
+    if player_id not in players_db:
+        raise HTTPException(status_code=404, detail="Player not found")
+    return players_db[player_id]
+
+class Player(BaseModel):
+    name: str
+    position: str
+    nfl_team: str
+
+@app.post("/players")
+def newPlayer(player: Player):
+    new_id = len(players_db) + 1
+    players_db[new_id] = player
+    return players_db[new_id]
