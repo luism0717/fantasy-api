@@ -9,7 +9,7 @@ DATABASE_URL = "postgresql://fantasy_user:password123@localhost/fantasy_db"
 engine = create_engine(DATABASE_URL)
 
 # Each request to your API gets its own database session
-SessionLocal = sessionmaker(autocommit=False, autoFlush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # All your database models will inerit from this
 Base = declarative_base()

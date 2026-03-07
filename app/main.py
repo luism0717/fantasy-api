@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from app.database import engine
+from app.database import engine, get_db
 from app import models
 
 models.Base.metadata.create_all(bind=engine)
@@ -24,8 +25,9 @@ def root():
     return {"message": "Fantasy API is alive!"}
 
 @app.get("/players")
-def playersInfo():
-    return players_db
+def getPlayers(db: Session = Depends(get_db)):
+    players = db.query(models.Player).all()
+    return players
 
 @app.get("/players/{player_id}")
 def getPlayer(player_id: int):
