@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app import models
 from app.database import engine, get_db
-from app.security import hash_password, verify_password, create_token
+from app.security import hash_password, verify_password, create_token, get_current_user
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -44,7 +44,7 @@ class Player(BaseModel):
     nfl_team: str
 
 @app.post("/players")
-def createPlayer(player: Player, db: Session = Depends(get_db)):
+def createPlayer(player: Player, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_player = models.Player(
         name=player.name,
         position=player.position,
