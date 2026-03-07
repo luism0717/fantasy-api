@@ -38,3 +38,11 @@ def newPlayer(player: Player):
     new_id = len(players_db) + 1
     players_db[new_id] = player
     return players_db[new_id]
+
+@app.delete("/players/{player_id}")
+def removePlayer(player_id: int):
+    if player_id not in players_db:
+        raise HTTPException(status_code=404, detail="Player ID not found")
+    player = players_db[player_id]
+    del(players_db[player_id])
+    return player
