@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from app import models
 from app.database import engine, get_db
 from app.security import hash_password, verify_password, create_token, get_current_user
+import random
+import string
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -94,3 +96,23 @@ def loginUser(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestFor
         raise HTTPException(status_code=401, detail="Wrong Password")
     token = create_token({"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer"}
+
+class LeagueCreate(BaseModel):
+    name: str
+    sport: str = "nfl"
+    max_teams: int = 10
+
+@app.post("/leagues")
+def createLeague(league: LeagueCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_league = models.League(
+        name=league.name,
+        sport=league.sport,
+        max_teams=league.max_teams,
+        invite_code="".join(random.choices(string.ascii_uppercase + string.digits, k=6)),
+        commissioner_id=current_user.id
+    )
+    db.add(db_league)
+    db.commit()
+    db.refresh(db_league)
+    return db_league
+
