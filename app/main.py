@@ -1,6 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from app.database import engine
+from app import models
+
+models.Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title = "Fantasy Sports API",
     description = "A fantasy sports app build with FastAPI. Made by Luis Mendez.",
