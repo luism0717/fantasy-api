@@ -41,10 +41,16 @@ class Player(BaseModel):
     nfl_team: str
 
 @app.post("/players")
-def newPlayer(player: Player):
-    new_id = len(players_db) + 1
-    players_db[new_id] = player
-    return players_db[new_id]
+def createPlayer(player: Player, db: Session = Depends(get_db)):
+    db_player = models.Player(
+        name=player.name,
+        position=player.position,
+        nfl_team=player.nfl_team
+    )
+    db.add(db_player)
+    db.commit()
+    db.refresh(db_player)
+    return db_player
 
 @app.delete("/players/{player_id}")
 def removePlayer(player_id: int):
