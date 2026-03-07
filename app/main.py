@@ -30,10 +30,11 @@ def getPlayers(db: Session = Depends(get_db)):
     return players
 
 @app.get("/players/{player_id}")
-def getPlayer(player_id: int):
-    if player_id not in players_db:
+def getPlayer(player_id: int, db: Session = Depends(get_db)):
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if player is None:
         raise HTTPException(status_code=404, detail="Player not found")
-    return players_db[player_id]
+    return player
 
 class Player(BaseModel):
     name: str
@@ -53,9 +54,10 @@ def createPlayer(player: Player, db: Session = Depends(get_db)):
     return db_player
 
 @app.delete("/players/{player_id}")
-def removePlayer(player_id: int):
-    if player_id not in players_db:
+def removePlayer(player_id: int, db: Session = Depends(get_db)):
+    player =  db.query(models.Player).filter(models.Player.id == player_id).first()
+    if player is None:
         raise HTTPException(status_code=404, detail="Player ID not found")
-    player = players_db[player_id]
-    del(players_db[player_id])
+    db.delete(player)
+    db.commit()
     return player
