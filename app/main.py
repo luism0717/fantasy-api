@@ -97,13 +97,13 @@ def loginUser(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestFor
     token = create_token({"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer"}
 
-class LeagueCreate(BaseModel):
+class CreateLeague(BaseModel):
     name: str
     sport: str = "nfl"
     max_teams: int = 10
 
 @app.post("/leagues")
-def createLeague(league: LeagueCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def createLeague(league: CreateLeague, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_league = models.League(
         name=league.name,
         sport=league.sport,
@@ -116,3 +116,44 @@ def createLeague(league: LeagueCreate, db: Session = Depends(get_db), current_us
     db.refresh(db_league)
     return db_league
 
+@app.get("/leagues")
+def getLeagues(db: Session = Depends(get_db)):
+    leagues = db.query(models.League).all()
+    return leagues
+
+@app.get("/leagues/{league_id}")
+def getLeague(league_id: int, db: Session = Depends(get_db)):
+    league = db.query(models.League).filter(models.League.id == league_id).first()
+    if league is None:
+        raise HTTPException(status_code=404, detail="League ID not found")
+    return league
+
+class CreateTeam(BaseModel):
+    name: str
+    invite_code: str
+
+@app.post("/leagues/{league_id}/join")
+def joinLeague(team: CreateTeam, league_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    league = db.query(models.League).filter(models.League.id == league_id).first()
+    if league is None:
+        raise HTTPException(status_code=404, detail="League not found")
+    
+    leagueInvite = db.query(models.League).filter(models.League.invite_code == team.invite_code).first()
+    if leagueInvite is None:
+        raise HTTPException(status_code=403, detail="Invalid invite code")
+    
+    leagueCapacity = db.query(models.Team).filter(models.Team.league_id == league_id).count()
+    if leagueCapacity >= league.max_teams:
+        raise HTTPException(status_code=400, detail="League is full")
+    
+    db_team = models.Team(
+        name = team.name,
+        total_points = 0,
+        league_id = league_id,
+        owner_id = current_user.id
+    )
+    db.add(db_team)
+    db.commit()
+    db.refresh(db_team)
+    return db_team
+        
