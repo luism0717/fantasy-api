@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
 
 # This is the connection string - it tells SQLAlchemy where your database is
-DATABASE_URL = "postgresql://fantasy_user:password123@localhost/fantasy_db"
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://fantasy_user:password123@localhost/fantasy_db")
 
 # The engine is the actual connection to the database
 engine = create_engine(DATABASE_URL)
