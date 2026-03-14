@@ -1,0 +1,45 @@
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app import models, schemas
+from app.security import get_current_user
+
+router = APIRouter()
+
+@router.get("/players")
+def getPlayers(db: Session = Depends(get_db)):
+    players = db.query(models.Player).all()
+    
+    return players
+
+@router.post("/players")
+def createPlayer(player: schemas.Player, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_player = models.Player(
+        name=player.name,
+        position=player.position,
+        nfl_team=player.nfl_team
+    )
+    db.add(db_player)
+    db.commit()
+    db.refresh(db_player)
+
+    return db_player
+
+@router.get("/players/{player_id}")
+def getPlayer(player_id: int, db: Session = Depends(get_db)):
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if player is None:
+        raise HTTPException(status_code=404, detail="Player not found")
+    
+    return player
+
+@router.delete("/players/{player_id}")
+def removePlayer(player_id: int, db: Session = Depends(get_db)):
+    player =  db.query(models.Player).filter(models.Player.id == player_id).first()
+    if player is None:
+        raise HTTPException(status_code=404, detail="Player ID not found")
+    
+    db.delete(player)
+    db.commit()
+
+    return player
