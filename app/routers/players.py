@@ -4,16 +4,24 @@ from app.database import get_db
 from app import models, schemas
 from app.security import get_current_user
 
-router = APIRouter()
+router = APIRouter(prefix="/players", tags=["Players"])
 
-@router.get("/players")
-def getPlayers(db: Session = Depends(get_db)):
+@router.get("/")
+def get_players(db: Session = Depends(get_db)):
     players = db.query(models.Player).all()
     
     return players
 
-@router.post("/players")
-def createPlayer(player: schemas.Player, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+@router.get("/{player_id}")
+def get_player(player_id: int, db: Session = Depends(get_db)):
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if player is None:
+        raise HTTPException(status_code=404, detail="Player not found")
+    
+    return player
+
+@router.post("/")
+def create_player(player: schemas.Player, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_player = models.Player(
         name=player.name,
         position=player.position,
@@ -25,16 +33,8 @@ def createPlayer(player: schemas.Player, db: Session = Depends(get_db), current_
 
     return db_player
 
-@router.get("/players/{player_id}")
-def getPlayer(player_id: int, db: Session = Depends(get_db)):
-    player = db.query(models.Player).filter(models.Player.id == player_id).first()
-    if player is None:
-        raise HTTPException(status_code=404, detail="Player not found")
-    
-    return player
-
-@router.delete("/players/{player_id}")
-def removePlayer(player_id: int, db: Session = Depends(get_db)):
+@router.delete("/{player_id}")
+def remove_player(player_id: int, db: Session = Depends(get_db)):
     player =  db.query(models.Player).filter(models.Player.id == player_id).first()
     if player is None:
         raise HTTPException(status_code=404, detail="Player ID not found")

@@ -5,7 +5,6 @@ from app.routers import players, auth, leagues, rosters
 
 models.Base.metadata.create_all(bind=engine)
 
-
 app = FastAPI(
     title = "Fantasy Sports API",
     description = "A fantasy sports app build with FastAPI. Made by Luis Mendez.",

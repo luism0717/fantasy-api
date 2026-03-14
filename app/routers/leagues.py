@@ -6,10 +6,10 @@ from app.security import get_current_user
 import random
 import string
 
-router = APIRouter()
+router = APIRouter(prefix="/leagues", tags=["Leagues"])
 
-@router.post("/leagues")
-def createLeague(league: schemas.CreateLeague, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+@router.post("/")
+def create_league(league: schemas.CreateLeague, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_league = models.League(
         name=league.name,
         sport=league.sport,
@@ -23,20 +23,20 @@ def createLeague(league: schemas.CreateLeague, db: Session = Depends(get_db), cu
 
     return db_league
 
-@router.get("/leagues")
-def getLeagues(db: Session = Depends(get_db)):
+@router.get("/")
+def get_leagues(db: Session = Depends(get_db)):
     return db.query(models.League).all()
 
-@router.get("/leagues/{league_id}")
-def getLeague(league_id: int, db: Session = Depends(get_db)):
+@router.get("/{league_id}")
+def get_league(league_id: int, db: Session = Depends(get_db)):
     league = db.query(models.League).filter(models.League.id == league_id).first()
     if league is None:
         raise HTTPException(status_code=404, detail="League ID not found")
     
     return league
 
-@router.post("/leagues/{league_id}/join")
-def joinLeague(team: schemas.CreateTeam, league_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+@router.post("/{league_id}/join")
+def join_league(team: schemas.CreateTeam, league_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     league = db.query(models.League).filter(models.League.id == league_id).first()
     if league is None:
         raise HTTPException(status_code=404, detail="League not found")
