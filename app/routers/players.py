@@ -20,7 +20,7 @@ def get_player(player_id: int, db: Session = Depends(get_db)):
     
     return player
 
-@router.post("/")
+@router.post("/", status_code=201)
 def create_player(player: schemas.Player, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_player = models.Player(
         name=player.name,

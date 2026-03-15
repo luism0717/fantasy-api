@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException
@@ -25,7 +25,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 def create_token(data: dict) -> str:
     """Create a signed JWT token that expired after EXPIRE_MINUTES."""
     payload = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=EXPIRE_MINUTES)
     payload.update({"exp": expire})
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
