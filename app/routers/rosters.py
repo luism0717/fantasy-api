@@ -6,7 +6,7 @@ from app.security import get_current_user
 
 router = APIRouter(prefix="/rosters", tags=["Rosters"])
 
-@router.post("/")
+@router.post("/", status_code=201)
 def add_to_roster(roster: schemas.RosterAdd, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     existing = db.query(models.Roster).filter(
         models.Roster.player_id == roster.player_id,

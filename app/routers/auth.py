@@ -7,7 +7,7 @@ from app.security import hash_password, verify_password, create_token
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-@router.post("/register")
+@router.post("/register", status_code=201)
 def register_user(user_register: schemas.UserRegister, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == user_register.email).first()
 

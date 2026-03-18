@@ -1,7 +1,7 @@
 def test_register_user(client):
     # Resiter User
     response = client.post("/auth/register", json={"username": "luis", "email": "luis@test.com", "password": "test123"})
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 def test_register_duplicate_email(client):
     client.post("/auth/register", json={"username": "luis", "email": "luis@test.com", "password": "test123"})

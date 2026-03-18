@@ -8,7 +8,7 @@ import string
 
 router = APIRouter(prefix="/leagues", tags=["Leagues"])
 
-@router.post("/")
+@router.post("/", status_code=201)
 def create_league(league: schemas.CreateLeague, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_league = models.League(
         name=league.name,
@@ -35,7 +35,7 @@ def get_league(league_id: int, db: Session = Depends(get_db)):
     
     return league
 
-@router.post("/{league_id}/join")
+@router.post("/{league_id}/join", status_code=201)
 def join_league(team: schemas.CreateTeam, league_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     league = db.query(models.League).filter(models.League.id == league_id).first()
     if league is None:
