@@ -29,6 +29,7 @@ def test_join_league(client):
     token = login.json()["access_token"]
     # Use the token
     headers = {"Authorization": f"Bearer {token}"}
+    # Create a league
     league = client.post("/leagues/", json={"name": "Test", "sport": "test", "max_teams": 8}, headers=headers)
     invite_code = league.json()["invite_code"]
     response = client.post("/leagues/1/join", json={"name": "My Team", "invite_code": invite_code}, headers=headers)
